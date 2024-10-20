@@ -1,0 +1,28 @@
+spring:
+    application:
+        name: OCIAPI
+
+oci-api:
+    clients:
+        e-invoice-api:
+            send-e-documents: https://legacy-mer.moj-eracun.hr/en/Manual/Stable/Api#send
+#    datasource:
+#        url: jdbc:h2:file:./data/ifusionadf;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+#        driver-class-name: org.h2.Driver
+#        username: ifusionadf
+#        password: ifusionadf
+#    h2:
+#        console:
+#            enabled: true
+#    jpa:
+#        properties:
+#            hibernate:
+#                default_schema: ifusionadf
+#        hibernate:
+#            ddl-auto: create
+#
+#springdoc:
+#    swagger-ui:
+#        disable-swagger-default-url: true
+#        version: "@springdoc.version@"
+

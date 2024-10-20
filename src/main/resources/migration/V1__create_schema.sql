@@ -1,0 +1,2 @@
+-- CREATE SCHEMA IF NOT EXISTS ifusionadf AUTHORIZATION ifusionadf;
+-- SET SCHEMA ifusionadf;

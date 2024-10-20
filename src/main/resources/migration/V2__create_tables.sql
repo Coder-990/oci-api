@@ -1,0 +1,14 @@
+-- CREATE TABLE ifusionadf.sender
+-- (
+--     id            BIGINT PRIMARY KEY AUTO_INCREMENT,
+--     username      INT          NOT NULL,
+--     password      VARCHAR(255) NOT NULL,
+--     company_id    VARCHAR(255) NOT NULL,
+--     company_bu    VARCHAR(255),
+--     software_id   VARCHAR(255) NOT NULL,
+--     filter        VARCHAR(255),
+--     electronic_id INT,
+--     status_id     INT,
+--     from_datetime TIMESTAMP,
+--     to_datetime   TIMESTAMP
+-- );
