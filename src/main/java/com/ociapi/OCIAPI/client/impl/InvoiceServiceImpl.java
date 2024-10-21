@@ -1,91 +1,114 @@
-//package com.ociapi.OCIAPI.client.impl;
-//
-//import com.ociapi.OCIAPI.client.InvoiceService;
-//import com.ociapi.OCIAPI.config.props.EInvoiceClientProps;
-//import com.ociapi.OCIAPI.controllers.requests.AddSenderRequest;
-//import lombok.RequiredArgsConstructor;
-//import org.springframework.http.*;
-//import org.springframework.stereotype.Service;
-//import org.springframework.web.client.RestClient;
-//import org.springframework.web.client.RestClientResponseException;
-//
-//import java.net.URI;
-//import java.nio.charset.StandardCharsets;
-//import java.nio.file.Files;
-//import java.nio.file.Path;
-//import java.util.Objects;
-//import java.util.stream.Stream;
-//
-//@Service
-//@RequiredArgsConstructor
-//public class InvoiceServiceImpl implements InvoiceService {
-//
-//    private final EInvoiceClientProps eInvoiceClientProps;
-//    private final RestClient restClient;
-//
-//    public String sendInvoice(String xmlFilePath) throws Exception {
-//        var xmlContent = Files.readString(Path.of(xmlFilePath));
-//        var escapedXml = getEscapedXml(xmlContent);
-//        var jsonPayload = "{ \"xmlPayload\": \"" + escapedXml + "\" }";
-//
-//        // 4. Postavljanje HTTP headera
-//        HttpHeaders headers = new HttpHeaders();
-//        headers.setContentType(MediaType.APPLICATION_JSON);
-//        // 5. Kreiranje zahtjeva
-//        RequestEntity<String> request = RequestEntity
-//                .post(new URI(eInvoiceClientProps.getSendEDocumentsUrl()))
-//                .headers(headers)
-//                .body(jsonPayload);
-//
-//        try {
-//            var response = Stream.ofNullable(restClient.method(HttpMethod.POST)
-//                    .uri(eInvoiceClientProps.getSendEDocumentsUrl())
-//                    .headers(httpHeaders -> httpHeaders.addAll(headers))
-//                    .body(Objects.requireNonNull(request.getBody()))
-//                    .retrieve()
-//                    .toEntity(AddSenderRequest.class));
-//
-//            // 7. Dobivanje ElectronicID-a iz odgovora
-//            String responseBody = response.getBody();
-//            return extractElectronicId(responseBody);
-//        } catch (RestClientResponseException e) {
-//            throw new RuntimeException("Error while sending invoice: " + e.getResponseBodyAsString(), e);
-//        }
-//    }
-//
-//    private static String getEscapedXml(String xmlContent) {
-//        return xmlContent
-//                .replace("<", "&lt;")
-//                .replace(">", "&gt;")
-//                .replace("&", "&amp;")
-//                .replace("\"", "&quot;")
-//                .replace("'", "&apos;");
-//    }
-//
-//    private String extractElectronicId(String responseBody) {
-//        // Ovdje je pojednostavljeno izdvajanje ElectronicID-a iz JSON odgovora
-//        // Preporučuje se korištenje biblioteke kao što je Jackson ili Gson za parsiranje JSON-a
-//        String key = "\"ElectronicID\": ";
-//        int startIndex = responseBody.indexOf(key) + key.length();
-//        int endIndex = responseBody.indexOf(",", startIndex);
-//        return responseBody.substring(startIndex, endIndex).trim();
-//    }
-//
-//    public String queryOutbox(String electronicId) throws Exception {
-//        // 8. Slanje zahtjeva za provjeru statusa dokumenta pomoću ElectronicID-a
-//        String queryUrl = eInvoiceClientProps.getSendEDocumentsUrl() + "?electronicId=" + electronicId;
-//        RequestEntity<Void> request = RequestEntity
-//                .get(new URI(queryUrl))
-//                .build();
-//
-//        try {
-//            ResponseEntity<String> response = restClient.method(HttpMethod.GET)
-//                    .uri(queryUrl)
-//                    .retrieve()
-//                    .toEntity(String.class);
-//            return response.getBody();
-//        } catch (RestClientResponseException e) {
-//            throw new RuntimeException("Error while querying outbox: " + e.getResponseBodyAsString(), e);
-//        }
-//    }
-//}
+package com.ociapi.OCIAPI.client.impl;
+
+import com.ociapi.OCIAPI.client.InvoiceService;
+import com.ociapi.OCIAPI.config.props.EInvoiceClientProps;
+import com.ociapi.OCIAPI.exceptions.PlatformException;
+import com.ociapi.OCIAPI.repositories.model.Sender;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.*;
+import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestClient;
+
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.Base64;
+
+@Service
+@RequiredArgsConstructor
+public class InvoiceServiceImpl implements InvoiceService {
+
+    private final EInvoiceClientProps eInvoiceClientProps;
+    private final RestClient restClient;
+
+    @Override
+    public Sender createSenderFromJson(Sender sender) {
+        try {
+            return restClient
+                    .post()
+                    .uri(eInvoiceClientProps.getSendEDocumentsUrl())
+                    .header(HttpHeaders.CONTENT_TYPE, MediaType.MULTIPART_FORM_DATA_VALUE)
+                    .accept(MediaType.APPLICATION_JSON)
+                    .body(sender)
+                    .retrieve()
+                    .toEntity(Sender.class)
+                    .getBody();
+        } catch (Exception e) {
+            throw new PlatformException("Failed to send JSON from service: " + e.getMessage(), e);
+        }
+    }
+
+    public String loadXml() throws IOException {
+        String xmlFilePath = "dat/EUnorm_CreditNote.xml";
+        String xmlContent = Files.readString(Path.of(xmlFilePath));
+        return extractPdfFromXml(xmlContent);
+    }
+
+    public String extractPdfFromXml(String xmlContent) throws IOException {
+        String base64PdfContent = getPdfContent(xmlContent);
+        byte[] pdfBytes = Base64.getDecoder().decode(base64PdfContent);
+        String pdfOutputPath = "output/file.pdf";
+        try (FileOutputStream fos = new FileOutputStream(pdfOutputPath)) {
+            fos.write(pdfBytes);
+            System.out.println("PDF successfully extracted to: " + pdfOutputPath);
+        }
+
+        return prepareEscapedXmlWithEncodedPdf(xmlContent); // Poziva iduću metodu nakon što izvuče PDF
+    }
+
+    private String getPdfContent(String xmlContent) {
+        String pdfTagStart = "<cbc:EmbeddedDocumentBinaryObject mimeCode=\"application/pdf\" filename=\"993-1-1.pdf\">";
+
+        String pdfTagEnd = "</cbc:EmbeddedDocumentBinaryObject>";
+
+        int startIndex = xmlContent.indexOf(pdfTagStart);
+        int endIndex = xmlContent.indexOf(pdfTagEnd);
+
+        if (startIndex == -1 || endIndex == -1) {
+            throw new IllegalArgumentException("PDF content not found in XML.");
+        }
+        return xmlContent.substring(startIndex + pdfTagStart.length(), endIndex).trim();
+    }
+
+    public String prepareEscapedXmlWithEncodedPdf(String xmlContent) throws IOException {
+        String encodedPdf = encodePdfToBase64();
+        String xmlWithPdf = xmlContent.replace("<cbc:EmbeddedDocumentBinaryObject></cbc:EmbeddedDocumentBinaryObject>",
+                "<cbc:EmbeddedDocumentBinaryObject>" + encodedPdf + "</cbc:EmbeddedDocumentBinaryObject>");
+
+        return escapeXml(xmlWithPdf); // Poziva iduću metodu za escapiranje XML-a
+    }
+
+    private String encodePdfToBase64() throws IOException {
+        File file = new File("output/file.pdf");
+        byte[] pdfBytes = Files.readAllBytes(file.toPath());
+        return Base64.getEncoder().encodeToString(pdfBytes);
+    }
+
+    private String escapeXml(String xmlContent) {
+        return xmlContent.replace("&", "&amp;")
+                .replace("<", "&lt;")
+                .replace(">", "&gt;")
+                .replace("\"", "&quot;")
+                .replace("'", "&apos;");
+    }
+
+    private String createJsonPayload(String escapedXml) {
+        return "{ \"xmlPayload\": \"" + escapedXml + "\" }";
+    }
+
+    @Override
+    public String process() {
+        String jsonPayload;
+        String escapedXml = "";
+        try {
+            escapedXml = loadXml();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        jsonPayload = createJsonPayload(escapedXml);
+        System.out.println("Generated JSON Payload: " + jsonPayload);
+        return jsonPayload;
+    }
+}

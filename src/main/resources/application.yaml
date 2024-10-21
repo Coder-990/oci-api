@@ -5,7 +5,8 @@ spring:
 oci-api:
     clients:
         e-invoice-api:
-            send-e-documents: https://legacy-mer.moj-eracun.hr/en/Manual/Stable/Api#send
+            send-e-documents-url: https://demo.moj-eracun.hr/apis/v2/send
+
 #    datasource:
 #        url: jdbc:h2:file:./data/ifusionadf;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
 #        driver-class-name: org.h2.Driver

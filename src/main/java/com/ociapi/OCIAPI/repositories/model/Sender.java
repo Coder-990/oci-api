@@ -14,15 +14,16 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class Sender {
 
-        private Long id;
-        private int username;
-        private String password;
-        private String companyId;
-        private String companyBu;
-        private String softwareId;
-        private String filter;
-        private Integer electronicId;
-        private Integer statusId;
-        private LocalDateTime from;
-        private LocalDateTime to;
+    //        private Long id;
+    private int username;
+    private String password;
+    private String companyId;
+    private String companyBu;
+    private String softwareId;
+    private String file;
+//        private String filter;
+//        private Integer electronicId;
+//        private Integer statusId;
+//        private LocalDateTime from;
+//        private LocalDateTime to;
 }
