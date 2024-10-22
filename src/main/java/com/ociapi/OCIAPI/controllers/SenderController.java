@@ -10,7 +10,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+import org.xml.sax.SAXException;
 
+import javax.xml.parsers.ParserConfigurationException;
 import java.io.IOException;
 
 @Slf4j
@@ -32,7 +34,7 @@ public class SenderController {
 
     @GetMapping("/senders/{id}")
     @ResponseStatus(HttpStatus.OK)
-    public SenderResponse fetchSenderById(@PathVariable Long id) {
+    public SenderResponse fetchSenderById(@PathVariable Long id) throws ParserConfigurationException, IOException, SAXException {
         log.info("Fetching sender with id {}... ", id);
         var sender = senderService.getOneById(id);
         var senderResponse = senderMapperService.toSenderResponse(sender);
@@ -42,12 +44,11 @@ public class SenderController {
 
     @PostMapping("/senders")
     @ResponseStatus(HttpStatus.CREATED)
-    public SenderResponse saveSender(@RequestBody AddSenderRequest addSenderRequest) throws IOException {
+    public SenderResponse saveSender(@RequestBody AddSenderRequest addSenderRequest) throws IOException, ParserConfigurationException, SAXException {
         log.info("Saving addSenderRequest with body {}... ", addSenderRequest);
-        var json = invoiceService.process();
-        var createdSender = senderMapperService.toAddSender(addSenderRequest, json);
-        var savedSender = senderService.create(createdSender);
-        var sender = invoiceService.getRestClient(savedSender);
+        var sender = senderMapperService.toAddSender(addSenderRequest);
+        var restClientSender = invoiceService.getSenderFromRestClient(sender);
+        var savedSender = senderService.create(restClientSender);
         var senderResponse = senderMapperService.toSenderResponse(sender);
         log.info("Saved sender with companyId {} with body {}", savedSender.getCompanyId(), senderResponse);
         return senderResponse;

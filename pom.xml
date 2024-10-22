@@ -32,10 +32,11 @@
 			<optional>true</optional>
 		</dependency>
 		<dependency>
-			<groupId>org.springframework</groupId>
-			<artifactId>spring-webflux</artifactId>
-			<version>5.3.18</version>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-text</artifactId>
+			<version>1.12.0</version>
 		</dependency>
+
 	</dependencies>
 	<build>
 		<plugins>
