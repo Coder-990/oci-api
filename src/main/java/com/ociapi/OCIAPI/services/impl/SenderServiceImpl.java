@@ -23,18 +23,17 @@ public class SenderServiceImpl implements SenderService {
 
     @Override
     public Sender getOneById(Long id) {
-        return null;
-//        return senderRepository.getSenders()
-//                .stream()
-//                .filter(s -> Objects.equals(s.getId(), id))
-//                .findFirst()
-//                .orElseThrow();
+        return senderRepository.getSenders()
+                .stream()
+                .filter(s -> Objects.equals(s.getId(), id))
+                .findFirst()
+                .orElseThrow();
     }
 
     @Override
     public Sender create(Sender sender) {
         var senders = senderRepository.getSenders();
-//        sender.setId(getNextSenderID());
+        sender.setId(getNextSenderID());
         checkIfUsernameExists(sender);
         senders.add(sender);
         return sender;
@@ -49,8 +48,7 @@ public class SenderServiceImpl implements SenderService {
         existingSender.setCompanyId(sender.getCompanyId());
         existingSender.setCompanyBu(sender.getCompanyBu());
         existingSender.setSoftwareId(sender.getSoftwareId());
-
-//        existingSender.setFilter(sender.getFilter());
+        existingSender.setFile(sender.getFile());
 //        existingSender.setElectronicId(sender.getElectronicId());
 //        existingSender.setStatusId(sender.getStatusId());
 //        existingSender.setFrom(sender.getFrom());
@@ -60,18 +58,18 @@ public class SenderServiceImpl implements SenderService {
 
     @Override
     public void deleteById(Long id) {
-//        senderRepository.getSenders()
-//                .removeIf(s -> Objects.equals(s.getId(), id));
+        senderRepository.getSenders()
+                .removeIf(s -> Objects.equals(s.getId(), id));
     }
 
-//    private Long getNextSenderID() {
-//        var senders = senderRepository.getSenders()
-//                .stream()
-//                .mapToLong(Sender::getId)
-//                .max()
-//                .orElse(0);
-//        return senders + 1;
-//    }
+    private Long getNextSenderID() {
+        var senders = senderRepository.getSenders()
+                .stream()
+                .mapToLong(Sender::getId)
+                .max()
+                .orElse(0);
+        return senders + 1;
+    }
 
     private void checkIfUsernameExists(Sender sender) {
         var matched = senderRepository.getSenders()

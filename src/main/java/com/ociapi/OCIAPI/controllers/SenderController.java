@@ -5,7 +5,6 @@ import com.ociapi.OCIAPI.controllers.mappers.SenderMapperService;
 import com.ociapi.OCIAPI.controllers.requests.AddSenderRequest;
 import com.ociapi.OCIAPI.controllers.responses.SenderResponse;
 import com.ociapi.OCIAPI.controllers.responses.SendersResponse;
-import com.ociapi.OCIAPI.repositories.model.Sender;
 import com.ociapi.OCIAPI.services.SenderService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -45,13 +44,12 @@ public class SenderController {
     @ResponseStatus(HttpStatus.CREATED)
     public SenderResponse saveSender(@RequestBody AddSenderRequest addSenderRequest) throws IOException {
         log.info("Saving addSenderRequest with body {}... ", addSenderRequest);
-        String json = invoiceService.process();
+        var json = invoiceService.process();
         var createdSender = senderMapperService.toAddSender(addSenderRequest, json);
-        Sender sender = invoiceService.createSenderFromJson(createdSender);
-
-        var savedSender = senderService.create(sender);
-        var senderResponse = senderMapperService.toSenderResponse(savedSender);
-//        log.info("Saved sender with id {} with body {}", savedSender.getId(), senderResponse);
+        var savedSender = senderService.create(createdSender);
+        var sender = invoiceService.getRestClient(savedSender);
+        var senderResponse = senderMapperService.toSenderResponse(sender);
+        log.info("Saved sender with companyId {} with body {}", savedSender.getCompanyId(), senderResponse);
         return senderResponse;
     }
 

@@ -14,13 +14,13 @@ import java.util.List;
 @Data
 public class SenderRepository {
 
-    private List<Sender> senders = new ArrayList<>();
+    private List<Sender> senders;
 
-    private SenderRepository() {
-        senders.add(firstSender());
-        senders.add(secondSender());
-        senders.add(thirdSender());
-    }
+//    private SenderRepository() {
+//        senders.add(firstSender());
+//        senders.add(secondSender());
+//        senders.add(thirdSender());
+//    }
 
     private Sender firstSender() {
         return Sender.builder()

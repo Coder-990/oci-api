@@ -23,14 +23,12 @@ public class InvoiceServiceImpl implements InvoiceService {
     private final EInvoiceClientProps eInvoiceClientProps;
     private final RestClient restClient;
 
-    @Override
-    public Sender createSenderFromJson(Sender sender) {
+    public Sender createSenderFromRestClient(Sender sender) {
         try {
             return restClient
                     .post()
                     .uri(eInvoiceClientProps.getSendEDocumentsUrl())
-                    .header(HttpHeaders.CONTENT_TYPE, MediaType.MULTIPART_FORM_DATA_VALUE)
-                    .accept(MediaType.APPLICATION_JSON)
+                    .contentType(MediaType.APPLICATION_JSON)
                     .body(sender)
                     .retrieve()
                     .toEntity(Sender.class)
@@ -38,6 +36,11 @@ public class InvoiceServiceImpl implements InvoiceService {
         } catch (Exception e) {
             throw new PlatformException("Failed to send JSON from service: " + e.getMessage(), e);
         }
+    }
+
+    @Override
+    public Sender getRestClient(Sender sender) {
+        return this.createSenderFromRestClient(sender);
     }
 
     public String loadXml() throws IOException {
