@@ -1,5 +1,6 @@
 package com.ociapi.OCIAPI.services.impl;
 
+import com.ociapi.OCIAPI.exceptions.UsernameExistsRuntimeException;
 import com.ociapi.OCIAPI.repositories.SenderRepository;
 import com.ociapi.OCIAPI.repositories.model.Sender;
 import com.ociapi.OCIAPI.services.SenderService;
@@ -49,10 +50,6 @@ public class SenderServiceImpl implements SenderService {
         existingSender.setCompanyBu(sender.getCompanyBu());
         existingSender.setSoftwareId(sender.getSoftwareId());
         existingSender.setFile(sender.getFile());
-//        existingSender.setElectronicId(sender.getElectronicId());
-//        existingSender.setStatusId(sender.getStatusId());
-//        existingSender.setFrom(sender.getFrom());
-//        existingSender.setTo(sender.getTo());
         return existingSender;
     }
 
@@ -76,7 +73,7 @@ public class SenderServiceImpl implements SenderService {
                 .stream()
                 .anyMatch(s -> Objects.equals(s.getUsername(), sender.getUsername()));
         if (matched)
-            throw new IllegalArgumentException();
+            throw new UsernameExistsRuntimeException("Username: " + sender.getUsername() + " exists");
 
     }
 

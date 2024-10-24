@@ -30,8 +30,8 @@ public class DecodedServiceXmlImpl implements DecodedServiceXml {
     }
 
     private String decodeEscapedXml(String escapedXml) {
-        String escapedXmlPayload = escapedXml.replace("{ \"xmlPayload\": \"", "").replace("\" }", "");
-        return StringEscapeUtils.unescapeXml(escapedXmlPayload);
+        String unescapedXmlPayload = escapedXml.replace("{ \"xmlPayload\": \"", "").replace("\" }", "");
+        return StringEscapeUtils.unescapeXml(unescapedXmlPayload);
     }
 
     private SenderResponse parseXmlToSenderResponse(String xml)

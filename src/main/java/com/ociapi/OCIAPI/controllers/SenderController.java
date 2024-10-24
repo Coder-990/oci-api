@@ -47,8 +47,8 @@ public class SenderController {
     public SenderResponse saveSender(@RequestBody AddSenderRequest addSenderRequest) throws IOException, ParserConfigurationException, SAXException {
         log.info("Saving addSenderRequest with body {}... ", addSenderRequest);
         var sender = senderMapperService.toAddSender(addSenderRequest);
-        var restClientSender = invoiceService.getSenderFromRestClient(sender);
-        var savedSender = senderService.create(restClientSender);
+        invoiceService.getSenderFromRestClient(sender);
+        var savedSender = senderService.create(sender);
         var senderResponse = senderMapperService.toSenderResponse(sender);
         log.info("Saved sender with companyId {} with body {}", savedSender.getCompanyId(), senderResponse);
         return senderResponse;

@@ -5,7 +5,6 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import org.springframework.stereotype.Repository;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -16,15 +15,16 @@ public class SenderRepository {
 
     private List<Sender> senders;
 
-//    private SenderRepository() {
-//        senders.add(firstSender());
-//        senders.add(secondSender());
-//        senders.add(thirdSender());
-//    }
+    private SenderRepository() {
+        senders = new ArrayList<>();
+        senders.add(firstSender());
+        senders.add(secondSender());
+        senders.add(thirdSender());
+    }
 
     private Sender firstSender() {
         return Sender.builder()
-//                .id(1L)
+                .id(1L)
                 .username(123)
                 .password("pass")
                 .companyId("CompanyId")
@@ -40,7 +40,7 @@ public class SenderRepository {
 
     private Sender secondSender() {
         return Sender.builder()
-//                .id(1L)
+                .id(1L)
                 .username(456)
                 .password("pass2")
                 .companyId("CompanyId2")
@@ -56,7 +56,7 @@ public class SenderRepository {
 
     private Sender thirdSender() {
         return Sender.builder()
-//                .id(1L)
+                .id(1L)
                 .username(789)
                 .password("pass3")
                 .companyId("CompanyId3")

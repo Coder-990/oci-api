@@ -25,12 +25,12 @@ public class EncodedServiceXmlImpl implements EncodedServiceXml {
             e.printStackTrace();
         }
         jsonPayload = createJsonPayload(escapedXml);
-        System.out.println("Generated JSON Payload: " + jsonPayload);
+//        System.out.println("Generated JSON Payload: " + jsonPayload);
         return jsonPayload;
     }
 
     private String loadXml() throws IOException {
-        String xmlFilePath = "dat/EUnorm_CreditNote.xml";
+        String xmlFilePath = "dat/EUnorm_avansni_racun_TIP_2.xml";
         String xmlContent = Files.readString(Path.of(xmlFilePath));
         return extractPdfFromXml(xmlContent);
     }
@@ -44,14 +44,12 @@ public class EncodedServiceXmlImpl implements EncodedServiceXml {
             System.out.println("PDF successfully extracted to: " + pdfOutputPath);
         }
 
-        return prepareEscapedXmlWithEncodedPdf(xmlContent); // Poziva iduću metodu nakon što izvuče PDF
+        return prepareEscapedXmlWithEncodedPdf(xmlContent);
     }
 
     private String getPdfContent(String xmlContent) {
         String pdfTagStart = "<cbc:EmbeddedDocumentBinaryObject mimeCode=\"application/pdf\" filename=\"993-1-1.pdf\">";
-
         String pdfTagEnd = "</cbc:EmbeddedDocumentBinaryObject>";
-
         int startIndex = xmlContent.indexOf(pdfTagStart);
         int endIndex = xmlContent.indexOf(pdfTagEnd);
 
@@ -63,10 +61,9 @@ public class EncodedServiceXmlImpl implements EncodedServiceXml {
 
     private String prepareEscapedXmlWithEncodedPdf(String xmlContent) throws IOException {
         String encodedPdf = encodePdfToBase64();
-        String xmlWithPdf = xmlContent.replace("<cbc:EmbeddedDocumentBinaryObject></cbc:EmbeddedDocumentBinaryObject>",
-                "<cbc:EmbeddedDocumentBinaryObject>" + encodedPdf + "</cbc:EmbeddedDocumentBinaryObject>");
 
-        return escapeXml(xmlWithPdf); // Poziva iduću metodu za escapiranje XML-a
+        return xmlContent.replace("<cbc:EmbeddedDocumentBinaryObject></cbc:EmbeddedDocumentBinaryObject>",
+                "<cbc:EmbeddedDocumentBinaryObject>" + encodedPdf + "</cbc:EmbeddedDocumentBinaryObject>");
     }
 
     private String encodePdfToBase64() throws IOException {
